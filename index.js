@@ -58,7 +58,7 @@ app.delete('/api/persons/:id', (req, res, next) => {
 });
 
 // create person
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const body = req.body;
 
     if (!body.name && !body.number) {
@@ -84,8 +84,10 @@ app.post('/api/persons', (req, res) => {
                     .then(person => {
                         res.json(person)
                     })
+                    .catch(error => next(error));
             }
-        });
+        })
+        .catch(error => next(error));
 });
 
 // update person
@@ -126,7 +128,9 @@ const errorHandler = (error, request, response, next) => {
     if (error.name === 'CastError' && error.kind === 'ObjectId') {
         return response.status(400).send({error: 'ID format invalid'})
     }
-
+    else if (error.name === 'ValidationError') {
+        return response.status(400).json({error: error.message})
+    }
     next(error)
 };
 app.use(errorHandler);
