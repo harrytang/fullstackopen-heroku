@@ -24,14 +24,14 @@ app.use(morgan((tokens, req, res) => {
         tokens.res(req, res, 'content-length'), '-',
         tokens['response-time'](req, res), 'ms',
         JSON.stringify(req.body)
-    ].join(' ')
+    ].join(' ');
 }));
 app.use(express.static('build'));
 
 // list all
 app.get('/api/persons', (req, res) => {
     Person.find().then(persons => {
-        res.json(persons)
+        res.json(persons);
     });
 });
 
@@ -45,14 +45,14 @@ app.get('/api/persons/:id', (req, res, next) => {
                 res.status(404).end();
             }
         })
-        .catch(error => next(error))
+        .catch(error => next(error));
 });
 
 // delete a person
 app.delete('/api/persons/:id', (req, res, next) => {
     Person.findByIdAndRemove(req.params.id)
-        .then(result => {
-            res.status(204).end()
+        .then(() => {
+            res.status(204).end();
         })
         .catch(error => next(error));
 });
@@ -64,16 +64,16 @@ app.post('/api/persons', (req, res, next) => {
     if (!body.name && !body.number) {
         return res.status(400).json({
             error: 'name and/or number is missing'
-        })
+        });
     }
 
     // name unique
-    Person.findOne({'name': body.name})
+    Person.findOne({ 'name': body.name })
         .then(person => {
             if (person) {
                 return res.status(400).json({
                     error: 'name must be unique'
-                })
+                });
             } else {
                 const person = {
                     name: body.name,
@@ -82,7 +82,7 @@ app.post('/api/persons', (req, res, next) => {
 
                 Person.create(person)
                     .then(person => {
-                        res.json(person)
+                        res.json(person);
                     })
                     .catch(error => next(error));
             }
@@ -99,25 +99,25 @@ app.put('/api/persons/:id', (req, res, next) => {
         number: body.number,
     };
 
-    Person.findByIdAndUpdate(req.params.id, person, {new: true})
+    Person.findByIdAndUpdate(req.params.id, person, { new: true })
         .then(updatedNote => {
-            res.json(updatedNote.toJSON())
+            res.json(updatedNote.toJSON());
         })
-        .catch(error => next(error))
+        .catch(error => next(error));
 });
 
 // info
 app.get('/info', (req, res) => {
     Person.count('name')
         .then(total => {
-            res.send(`phonbook has ${total} people.<br/> ${new Date()}`)
+            res.send(`phonbook has ${total} people.<br/> ${new Date()}`);
         });
 
 });
 
 /* handler of requests with unknown endpoint */
 const unknownEndpoint = (req, res) => {
-    res.status(404).send({error: 'unknown endpoint'})
+    res.status(404).send({ error: 'unknown endpoint' });
 };
 app.use(unknownEndpoint);
 
@@ -126,17 +126,18 @@ const errorHandler = (error, request, response, next) => {
     console.error(error.message);
 
     if (error.name === 'CastError' && error.kind === 'ObjectId') {
-        return response.status(400).send({error: 'ID format invalid'})
+        return response.status(400).send({ error: 'ID format invalid' });
     }
     else if (error.name === 'ValidationError') {
-        return response.status(400).json({error: error.message})
+        return response.status(400).json({ error: error.message });
     }
-    next(error)
+    next(error);
 };
 app.use(errorHandler);
 
 // start server
+// eslint-disable-next-line no-undef
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`);
 });
